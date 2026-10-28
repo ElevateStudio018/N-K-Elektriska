@@ -1,9 +1,9 @@
 # Nya nykael.se – Nyberg & Karlsons Elektriska AB
 
-Statisk webbplats byggd med samma designsystem och sidstruktur som nya Bloms El & Data (heroförslag 15:
-fotohero med överlappande bildkort, färgad navbar med enkel meny, Poppins, växlande split-sektioner, bildkort,
-citat, bildremsa, mörk sektion, bildband, förtroenderad och färgad sidfot). Färgerna kommer ur Nyberg & Karlsons
-logotyp: marinblått för navbar och sidfot, vinrött för knappar och etiketter, ljusblått som accent.
+Statisk webbplats med samma tekniska upplägg och kvalitetsnivå som nya Bloms El & Data, men med en egen
+formgivning utgången från Nyberg & Karlsons logotyp: vit navbar med logotypen i färg, telefonnummer och
+kontaktknapp, marinblå duotonhero med årtalet 1910, numrerade verksamhetskort och logotypens tre linjer
+(ljusblå, vinröd, marinblå) som återkommande motiv.
 
 All fakta kommer från nykael.se: startsidan, *Företaget*, *Kontakta oss* och WordPress-mediabiblioteket.
 
@@ -14,7 +14,7 @@ All fakta kommer från nykael.se: startsidan, *Företaget*, *Kontakta oss* och W
 - `site/img/` logotyp och bilder hämtade från nykael.se
 
 Sidorna ligger på samma adresser som tidigare, så gamla länkar fungerar: `/`, `/foretaget/`, `/kontakta-oss/`.
-Nytt är `/verksamhet/` (motsvarar Bloms Tjänster-sida).
+Nytt är `/verksamhet/` med alla verksamhetsområden.
 Dessutom `404.html`, `robots.txt` och `sitemap.xml`. Publicera innehållet i `site/` som webbplatsens rot.
 
 ## Bilder och logotyp

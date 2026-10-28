@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Genererar alla sidor för nya nykael.se: python3 site/build.py
 
-Samma uppbyggnad som Bloms El & Data: navbar, fotohero med överlappande bildkort,
-växlande split-sektioner, bildkort, citat, bildremsa, mörk sektion, bildband och förtroenderad.
 Gamla adresser (/, /foretaget/, /kontakta-oss/) finns kvar så att befintliga länkar fungerar.
 All fakta kommer från nykael.se (startsida, Företaget, Kontakta oss och mediabiblioteket).
 """
@@ -35,10 +33,7 @@ ICON = {
     "phone": '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
     "mail": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
     "pin": '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
-    "form": '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
-    "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-    "search": '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/>',
-}
+    }
 
 
 def icon(name):
@@ -110,15 +105,19 @@ def head(p, page, title, desc, path, extra=""):
 
 
 def nav(p, current):
-    items = [("index", "Hem", f"{p}index.html"), ("verksamhet", "Verksamhet", f"{p}verksamhet/"),
+    items = [("index", "Start", f"{p}index.html"), ("verksamhet", "Verksamhet", f"{p}verksamhet/"),
              ("foretaget", "Företaget", f"{p}foretaget/"), ("kontakt", "Kontakt", f"{p}kontakta-oss/")]
     cur = ' aria-current="page"'
     lis = "".join(f'<li><a href="{href}"{cur if key == current else ""}>{label}</a></li>' for key, label, href in items)
     return f"""<a class="skip" href="#innehall">Hoppa till innehållet</a>
 <header class="nav"><div class="wrap">
-<a class="logo" href="{p}index.html"><img src="{p}img/logo-nyberg-karlsons-vit.png" width="640" height="176" alt="Nyberg &amp; Karlsons Elektriska AB, sedan 1910"></a>
+<a class="logo" href="{p}index.html"><img src="{p}img/logo-nyberg-karlsons.png" width="640" height="176" alt="Nyberg &amp; Karlsons Elektriska AB, sedan 1910"></a>
+<div class="nav-right">
 <button class="burger" type="button" aria-expanded="false" aria-controls="meny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Meny</button>
-<ul class="menu" id="meny">{lis}</ul>
+<nav aria-label="Huvudmeny"><ul class="menu" id="meny">{lis}</ul></nav>
+<a class="nav-tel" href="tel:{CO['tel']}" aria-label="Ring {CO['phone']}">{icon('phone')}<span>{CO['phone']}</span></a>
+<a class="btn btn-navy" href="{p}kontakta-oss/#formular">Kontakta oss</a>
+</div>
 </div></header>
 <main id="innehall">
 """
@@ -162,17 +161,18 @@ def schema():
     return f'<script type="application/ld+json">{json.dumps(data, ensure_ascii=False)}</script>\n'
 
 
-def ring(cls="btn-red"):
-    return f'<a class="btn {cls}" href="tel:{CO["tel"]}">Ring oss</a>'
+def ring(cls="btn-line"):
+    return f'<a class="btn {cls}" href="tel:{CO["tel"]}">{icon("phone")}Ring {CO["phone"]}</a>'
 
 
-def kontakt_btn(p, cls="btn-line"):
-    return f'<a class="btn {cls} arrow" href="{p}kontakta-oss/">Kontakta oss </a>'
+def kontakt_btn(p, cls="btn-navy"):
+    return f'<a class="btn {cls} arrow" href="{p}kontakta-oss/#formular">Kontakta oss </a>'
 
 
-def img_card(p, a, href):
-    return (f'<a class="card" href="{href}"><div class="img">{picture(p, a["img"], "", 960, 540)}</div>'
-            f'<div class="row">{a["title"]}<span aria-hidden="true">→</span></div></a>')
+def svc_card(p, n, a, wide=False):
+    cls = "svc wide" if wide else "svc"
+    return (f'<article class="{cls}" id="{a["id"]}"><div class="img">{picture(p, a["img"], a["alt"], 960, 640)}</div>'
+            f'<div class="in"><i>{n:02d}</i><h3>{a["title"]}</h3><p>{a["text"]}</p></div></article>')
 
 
 def person_card(x):
@@ -182,93 +182,99 @@ def person_card(x):
 </div></article>"""
 
 
-def split(p, img, inner, gray=False, rev=False, sec_id="", seal=False, media_cls=""):
-    cls = "sec gray" if gray else "sec"
-    sid = f' id="{sec_id}"' if sec_id else ""
-    sl = '<div class="seal"><div><small>Sedan</small>1910</div></div>' if seal else ""
-    mc = f"media {media_cls}".strip()
-    return (f'<section class="{cls}"{sid}><div class="wrap split{" rev" if rev else ""}">'
-            f'<div class="{mc}">{picture(p, *img)}{sl}</div><div class="prose">{inner}</div></div></section>\n')
+def contact_list():
+    return f"""<ul class="contact-list">
+<li><span class="ic">{icon('phone')}</span><div><b>Telefon</b><a href="tel:{CO['tel']}">{CO['phone']}</a></div></li>
+<li><span class="ic">{icon('mail')}</span><div><b>E-post</b><a href="mailto:{CO['email']}">{CO['email']}</a></div></li>
+<li><span class="ic">{icon('pin')}</span><div><b>Adress</b><a href="{MAPS}" target="_blank" rel="noopener">{CO['street']}, {CO['zip']} {CO['city']}</a></div></li>
+</ul>"""
 
 
-def trust():
-    return f"""<section class="sec gray" style="padding-block:48px"><div class="wrap"><div class="trust">
-<div><span class="ic">{icon('clock')}</span><span><b>SEDAN 1910</b><small>Elinstallationer i Göteborgsområdet</small></span></div>
-<a href="https://www.elsakerhetsverket.se/" target="_blank" rel="noopener"><span class="ic">{icon('search')}</span><span><b>KOLLA ELFÖRETAGET</b><small>Kontrollera elföretag hos Elsäkerhetsverket</small></span></a>
+def hero(p, img, h1, lead, eyebrow="", listing="", img_style="", year=True):
+    eb = f'<span class="eyebrow">{eyebrow}</span>' if eyebrow else ""
+    cls = "hero" if listing else "hero no-cards"
+    lst = f'<nav class="hero-list" aria-label="Verksamhetsområden">{listing}</nav>' if listing else ""
+    yr = '<div class="year" aria-hidden="true">1910</div>' if year else ""
+    return f"""<section class="{cls}"><div class="hero-bg">{picture(p, img[0], '', img[2], img[3], eager=True, style=img_style)}</div>{yr}<div class="wrap">
+<div class="hero-text">{eb}<h1>{h1}</h1><p class="lead">{lead}</p>
+<div class="btns">{kontakt_btn(p, 'btn-blue')}{ring('btn-ghost')}</div></div>
+{lst}</div></section>
+"""
+
+
+def facts():
+    return """<section class="sec dark"><div class="wrap">
+<div class="sec-head"><div class="prose"><span class="eyebrow">Varför Nyberg &amp; Karlsons</span><h2 class="h2">Ett etablerat elföretag i Göteborg</h2></div></div>
+<div class="facts">
+<div class="fact"><div class="num">1910</div><h3>Lång erfarenhet</h3><p>Företaget har utfört elinstallationer i Göteborgsområdet sedan starten 1910.</p></div>
+<div class="fact"><div class="num word">Service</div><h3>Service i fokus</h3><p>Huvuddelen av verksamheten består av servicearbeten åt en stor kundkrets.</p></div>
+<div class="fact"><div class="num word">Industri, fastighet &amp; butik</div><h3>En bred kundkrets</h3><p>Vi arbetar åt kunder inom industri, fastighetsförvaltning och butiker.</p></div>
 </div></div></section>
 """
 
 
-def hero(p, img, h1, lead, eyebrow="", cards="", img_style=""):
-    eb = f'<span class="eyebrow">{eyebrow}</span>' if eyebrow else ""
-    cls = "hero" if cards else "hero no-cards"
-    cards_html = f'<div class="hero-cards">{cards}</div>' if cards else ""
-    return f"""<section class="{cls}"><div class="hero-bg">{picture(p, img[0], '', img[2], img[3], eager=True, style=img_style)}</div><div class="wrap">
-<div class="hero-text">{eb}<h1>{h1}</h1><p class="lead">{lead}</p>
-<div class="btns">{ring()}{kontakt_btn(p, 'btn-ghost')}</div></div>
-{cards_html}</div></section>
+def cta(p):
+    return f"""<section class="sec gray"><div class="wrap split">
+<div class="prose"><span class="eyebrow">Kontakt</span><h2 class="h2">Behöver ni hjälp med el?</h2>
+<p>Berätta vad som ska göras så återkommer vi. Ni kan också vända er direkt till någon av våra projektledare.</p>
+<div class="btns">{kontakt_btn(p)}<a class="btn btn-line arrow" href="{p}kontakta-oss/#projektledare">Våra projektledare </a></div></div>
+{contact_list()}
+</div></section>
 """
 
 
-# ------------------------------------------------------------------ Hem
+# ------------------------------------------------------------------ Start
 def page_index():
     p = ""
-    cards = "".join(img_card(p, BYID[k], f"verksamhet/#{k}") for k in ["service", "industri", "fastighet", "butik"])
-    tjanster = "".join(img_card(p, a, f"verksamhet/#{a['id']}") for a in AREAS)
+    listing = "".join(f'<a href="verksamhet/#{k}"><i>{i:02d}</i><b>{t}</b><small>{s}</small></a>' for i, (k, t, s) in enumerate([
+        ("service", "Servicearbeten", "Vår huvudsakliga verksamhet"),
+        ("industri", "Industri", "Installation och service"),
+        ("fastighet", "Fastighetsförvaltning", "El i förvaltade fastigheter"),
+        ("butik", "Butiker", "El i handelslokaler"),
+    ], 1))
+    body = hero(p, BUILDING, "Elinstallationer i Göteborgsområdet sedan 1910",
+                "Nyberg &amp; Karlsons Elektriska AB utför främst servicearbeten åt kunder inom industri, fastighetsförvaltning och butiker, men även nyproduktion och ombyggnader.",
+                eyebrow="Elinstallationer · Göteborg", listing=listing, img_style="object-position:center 40%")
+    body += f"""<section class="sec" id="om"><div class="wrap split">
+<div class="prose"><span class="eyebrow">Om företaget</span><h2 class="h2">Mer än hundra år av elarbeten i Göteborg</h2>
+<p>Nyberg &amp; Karlsons Elektriska AB startades 1910 och har sedan dess utfört elinstallationer i Göteborgsområdet.</p>
+<p>Verksamheten består i huvudsak av servicearbeten åt en stor kundkrets inom industri, fastighetsförvaltning och butiker, men även en del nyproduktion och ombyggnader.</p>
+<div class="btns"><a class="btn btn-line arrow" href="foretaget/">Läs mer om företaget </a></div></div>
+<figure class="media left">{picture(p, *VAN)}<div class="badge"><small>Sedan</small><b>1910</b></div></figure>
+</div></section>
+"""
+    cards = "".join(svc_card(p, i, a) for i, a in enumerate(AREAS, 1)).replace(' id="', ' data-id="')
+    body += f"""<section class="sec gray" id="verksamhet"><div class="wrap">
+<div class="sec-head"><div class="prose"><span class="eyebrow">Verksamhet</span><h2 class="h2">Det här arbetar vi med</h2>
+<p>Service är kärnan i verksamheten. Vid sidan av den åtar vi oss nyproduktion och ombyggnader.</p></div>
+<a class="btn btn-line arrow" href="verksamhet/">Hela verksamheten </a></div>
+<div class="grid g3">{cards}</div></div></section>
+"""
+    body += facts()
     people = "".join(person_card(x) for x in PEOPLE)
-    body = hero(p, BUILDING, "Elinstallationer i Göteborg sedan 1910",
-                "Nyberg &amp; Karlsons Elektriska AB har sedan 1910 utfört elinstallationer i Göteborgsområdet, främst servicearbeten åt industri, fastighetsförvaltning och butiker.",
-                cards=cards, img_style="object-position:center 40%")
-    body += split(p, ("bild-elservice", "Elektriker monterar ett vägguttag", 960, 639),
-                  '<span class="eyebrow">Verksamheten</span><h2 class="h2">Servicearbeten, nyproduktion och ombyggnader</h2>'
-                  '<p>Verksamheten består i huvudsak av servicearbeten åt en stor kundkrets inom industri, fastighetsförvaltning och butiker, men även en del nyproduktion och ombyggnader.</p>'
-                  '<div class="btns"><a class="btn btn-line arrow" href="verksamhet/">Läs mer om verksamheten </a></div>')
-    body += split(p, ("bild-industri-elcentral", "Elektriker arbetar i ett elskåp", 960, 639),
-                  '<span class="eyebrow">Företag och fastigheter</span><h2 class="h2">Elfirma i Göteborg för industri, fastighet och butik</h2>'
-                  '<p>Våra kunder finns inom industri, fastighetsförvaltning och butiker. Det är åt dem vi utför den största delen av våra servicearbeten.</p>'
-                  f'<p>Ni når våra projektledare direkt, eller växeln på <a href="tel:{CO["tel"]}">{CO["phone"]}</a>.</p>'
-                  f'<div class="btns">{ring()}</div>', gray=True, rev=True)
-    body += (f'<section class="sec" id="tjanster"><div class="wrap"><div class="sec-head"><div class="prose"><span class="eyebrow">Verksamhet</span>'
-             f'<h2 class="h2">Det här arbetar vi med</h2></div>{ring()}</div><div class="grid g3">{tjanster}</div></div></section>\n')
-    body += split(p, BUILDING,
-                  '<span class="eyebrow">Företaget</span><h2 class="h2">Mer än hundra år i Göteborgsområdet</h2>'
-                  '<p>Nyberg &amp; Karlsons Elektriska AB startades 1910 och har sedan dess utfört elinstallationer i Göteborgsområdet.</p>'
-                  f'<p>Kontoret finns på {CO["street"]} i Göteborg.</p>'
-                  '<div class="btns"><a class="btn btn-line arrow" href="foretaget/">Läs mer om företaget </a></div>', gray=True, seal=True)
-    body += (f'<section class="sec" id="projektledare"><div class="wrap split"><div><span class="eyebrow">Personal</span>'
-             f'<p class="quote">Kontakta våra <em>projektledare</em> direkt.</p></div><div class="prose">'
-             f'<p>Har ni ett servicejobb, en ombyggnad eller ett nytt projekt? Ring eller mejla någon av våra projektledare.</p>'
-             f'<div class="grid" style="gap:16px">{people}</div></div></div></section>\n')
-    body += f'<div class="photo-strip">{picture(p, "bild-nyproduktion-kabelstegar", "Kablar dragna på kabelstegar", 1400, 1050, style="object-position:center 55%")}</div>\n'
-    body += (f'<section class="sec dark"><div class="wrap split"><div class="prose"><span class="eyebrow">Varför Nyberg &amp; Karlsons</span>'
-             f'<h2 class="h2">Ett etablerat elföretag sedan 1910</h2>'
-             f'<p>Nyberg &amp; Karlsons Elektriska AB har funnits sedan 1910 och har under hela den tiden utfört elinstallationer i Göteborgsområdet.</p>'
-             f'<p>Servicearbetena är kärnan i verksamheten, och kundkretsen finns inom industri, fastighetsförvaltning och butiker.</p>'
-             f'<div class="btns">{ring()}{kontakt_btn(p, "btn-ghost")}</div></div>'
-             f'<div class="prose"><ul class="checklist"><li class="chk">Elinstallationer i Göteborgsområdet sedan 1910</li><li class="chk">Främst servicearbeten</li>'
-             f'<li class="chk">Kunder inom industri, fastighetsförvaltning och butiker</li><li class="chk">Även nyproduktion och ombyggnader</li>'
-             f'<li class="chk">Projektledare som ni når direkt</li></ul></div></div></section>\n')
-    body += (f'<section class="band">{picture(p, *BUILDING)}<div class="wrap"><div class="prose"><span class="eyebrow">Kontakt</span>'
-             f'<h2 class="h2">Behöver ni hjälp med el?</h2><p>Berätta vad som ska göras så återkommer vi. Ni når oss på {CO["phone"]} eller {CO["email"]}.</p>'
-             f'<div class="btns">{kontakt_btn(p, "btn-white")}</div></div></div></section>\n')
-    body += trust()
+    body += f"""<section class="sec" id="projektledare"><div class="wrap">
+<div class="sec-head"><div class="prose"><span class="eyebrow">Personal</span><h2 class="h2">Kontakta våra projektledare</h2>
+<p>Ring eller mejla direkt till någon av våra projektledare, eller kontakta växeln på <a href="tel:{CO['tel']}">{CO['phone']}</a>.</p></div></div>
+<div class="grid g2">{people}</div></div></section>
+"""
+    body += cta(p)
     return (head(p, "index", "Elinstallationer i Göteborg sedan 1910 | Nyberg & Karlsons Elektriska AB",
                  "Nyberg & Karlsons Elektriska AB utför elinstallationer i Göteborgsområdet sedan 1910. Främst servicearbeten åt industri, fastighetsförvaltning och butiker.",
                  "/", schema()) + nav(p, "index") + body + foot(p))
 
 
-# ------------------------------------------------------------------ Verksamhet (motsvarar Bloms Tjänster)
+# ------------------------------------------------------------------ Verksamhet
 def page_verksamhet():
     p = "../"
-    cards = "".join(img_card(p, BYID[k], f"#{k}") for k in ["service", "industri", "fastighet", "butik"])
     body = hero(p, ("bild-elcentral-plintar", "", 1024, 576), "Vår verksamhet",
                 "Främst servicearbeten åt kunder inom industri, fastighetsförvaltning och butiker, men även en del nyproduktion och ombyggnader i Göteborgsområdet.",
-                eyebrow="Elinstallationer Göteborg", cards=cards)
-    for i, a in enumerate(AREAS):
-        body += split(p, (a["img"], a["alt"], 960, 640),
-                      f'<span class="eyebrow">Verksamhet</span><h2 class="h2">{a["title"]}</h2><p>{a["text"]}</p>'
-                      f'<div class="btns">{ring()}{kontakt_btn(p)}</div>', gray=bool(i % 2), rev=bool(i % 2), sec_id=a["id"])
-    body += trust()
+                eyebrow="Verksamhet", year=False)
+    cards = "".join(svc_card(p, i, a, wide=True) for i, a in enumerate(AREAS, 1))
+    body += f"""<section class="sec"><div class="wrap">
+<div class="sec-head"><div class="prose"><span class="eyebrow">Verksamhetsområden</span><h2 class="h2">Service först, nyproduktion och ombyggnader därtill</h2></div></div>
+<div class="grid g2">{cards}</div></div></section>
+"""
+    body += cta(p)
     return (head(p, "verksamhet", "Verksamhet – elservice för industri, fastighet och butik | Nyberg & Karlsons Elektriska AB",
                  "Servicearbeten och elinstallationer för industri, fastighetsförvaltning och butiker samt nyproduktion och ombyggnader i Göteborgsområdet.",
                  "/verksamhet/") + nav(p, "verksamhet") + body + foot(p))
@@ -280,26 +286,24 @@ def page_foretaget():
     body = hero(p, BUILDING, "Om Nyberg &amp; Karlsons Elektriska AB",
                 "Ett elföretag i Göteborg som har utfört elinstallationer i Göteborgsområdet sedan 1910.", eyebrow="Företaget",
                 img_style="object-position:center 40%")
-    body += split(p, BUILDING,
-                  '<span class="eyebrow">Sedan 1910</span><h2 class="h2">Elinstallationer i Göteborgsområdet i mer än hundra år</h2>'
-                  '<p>Nyberg &amp; Karlsons Elektriska AB startades 1910 och har sedan dess utfört elinstallationer i Göteborgsområdet.</p>'
-                  '<p>Verksamheten består i huvudsak av servicearbeten åt en stor kundkrets inom industri, fastighetsförvaltning och butiker, men även en del nyproduktion och ombyggnader.</p>'
-                  f'<div class="btns">{ring()}{kontakt_btn(p)}</div>', seal=True)
+    body += f"""<section class="sec"><div class="wrap split">
+<div class="prose"><span class="eyebrow">Sedan 1910</span><h2 class="h2">Elinstallationer i Göteborgsområdet i mer än hundra år</h2>
+<p>Nyberg &amp; Karlsons Elektriska AB startades 1910 och har sedan dess utfört elinstallationer i Göteborgsområdet.</p>
+<p>Verksamheten består i huvudsak av servicearbeten åt en stor kundkrets inom industri, fastighetsförvaltning och butiker, men även en del nyproduktion och ombyggnader.</p></div>
+<figure class="media">{picture(p, *BUILDING)}<figcaption>Företagets lokaler och servicebilar.</figcaption></figure>
+</div></section>
+"""
     checks = "".join(f'<li class="chk">{a["title"]}</li>' for a in AREAS)
-    body += split(p, VAN,
-                  '<span class="eyebrow">Verksamhet</span><h2 class="h2">Service i första hand</h2>'
-                  '<p>Det mesta vi gör är servicearbeten åt en stor kundkrets. Vid sidan av servicen utför vi även en del nyproduktion och ombyggnader.</p>'
-                  f'<ul class="checklist">{checks}</ul><div class="btns"><a class="btn btn-line arrow" href="../verksamhet/">Läs mer om verksamheten </a></div>',
-                  gray=True, rev=True, media_cls="left")
-    kunder = "".join(img_card(p, BYID[k], "../verksamhet/#" + k) for k in ["industri", "fastighet", "butik"])
-    body += (f'<section class="sec"><div class="wrap"><div class="sec-head"><div class="prose"><span class="eyebrow">Kunder</span>'
-             f'<h2 class="h2">Vilka vi arbetar åt</h2></div>{ring()}</div><div class="grid g3">{kunder}</div></div></section>\n')
-    contacts = "".join(f'<li class="chk">{x["name"]}, projektledare · <a href="tel:{x["tel"]}">{x["mobile"]}</a></li>' for x in PEOPLE)
-    body += (f'<section class="sec dark"><div class="wrap split"><div class="prose"><span class="eyebrow">Personal</span>'
-             f'<h2 class="h2">Kontakta våra projektledare</h2><p>Ni når våra projektledare direkt på mobil eller e-post, eller växeln på {CO["phone"]}.</p>'
-             f'<div class="btns">{ring()}{kontakt_btn(p, "btn-ghost")}</div></div><div class="prose"><ul class="checklist">{contacts}'
-             f'<li class="chk">Växel · <a href="tel:{CO["tel"]}">{CO["phone"]}</a></li><li class="chk"><a href="mailto:{CO["email"]}">{CO["email"]}</a></li></ul></div></div></section>\n')
-    body += trust()
+    body += f"""<section class="sec gray"><div class="wrap split top">
+<div class="prose"><span class="eyebrow">Verksamhet</span><h2 class="h2">Service i första hand</h2>
+<p>Det mesta vi gör är servicearbeten åt en stor kundkrets. Vid sidan av servicen utför vi även en del nyproduktion och ombyggnader.</p>
+<ul class="checklist cols">{checks}</ul>
+<div class="btns"><a class="btn btn-line arrow" href="../verksamhet/">Läs mer om verksamheten </a></div></div>
+<figure class="media left">{picture(p, *VAN)}<div class="badge"><small>Sedan</small><b>1910</b></div></figure>
+</div></section>
+"""
+    body += facts()
+    body += cta(p)
     return (head(p, "foretaget", "Företaget – elföretag i Göteborg sedan 1910 | Nyberg & Karlsons Elektriska AB",
                  "Nyberg & Karlsons Elektriska AB startades 1910 och utför elinstallationer i Göteborgsområdet, främst servicearbeten åt industri, fastighetsförvaltning och butiker.",
                  "/foretaget/") + nav(p, "foretaget") + body + foot(p))
@@ -309,35 +313,48 @@ def page_foretaget():
 def page_kontakt():
     p = "../"
     people = "".join(person_card(x) for x in PEOPLE)
-    cards = (f'<a class="card icon" href="tel:{CO["tel"]}"><div class="ic">{icon("phone")}</div><div class="row">Ring oss<small>{CO["phone"]}</small></div></a>'
-             f'<a class="card icon" href="mailto:{CO["email"]}"><div class="ic">{icon("mail")}</div><div class="row">Mejla oss<small>{CO["email"]}</small></div></a>'
-             f'<a class="card icon" href="#karta"><div class="ic">{icon("pin")}</div><div class="row">Besök oss<small>{CO["street"]}, {CO["zip"]} {CO["city"]}</small></div></a>'
-             f'<a class="card icon" href="#formular"><div class="ic">{icon("form")}</div><div class="row">Skicka förfrågan<small>Beskriv vad ni behöver hjälp med</small></div></a>')
     options = "".join(f"<option>{o}</option>" for o in ["Service / felsökning", "Industri", "Fastighetsförvaltning", "Butik", "Nyproduktion", "Ombyggnad", "Annat"])
-    body = (f'<section class="hero"><div class="hero-bg">{picture(p, VAN[0], "", VAN[2], VAN[3], eager=True)}</div><div class="wrap">'
-            f'<div class="hero-text"><span class="eyebrow">{escape(CO["name"])}</span><h1>Kontakta oss</h1>'
-            f'<p class="lead">Vad kan vi hjälpa er med? Ring växeln, mejla eller kontakta någon av våra projektledare direkt.</p></div>'
-            f'<div class="hero-cards">{cards}</div></div></section>\n')
-    body += (f'<section class="sec" id="projektledare"><div class="wrap"><div class="sec-head"><div class="prose"><span class="eyebrow">Personal</span>'
-             f'<h2 class="h2">Kontakta våra projektledare</h2></div>{ring()}</div><div class="grid g2">{people}</div></div></section>\n')
-    body += f"""<section class="sec gray" id="formular"><div class="wrap split"><div class="prose"><span class="eyebrow">Vi vill höra av er!</span><h2 class="h2">Berätta vad ni behöver hjälp med</h2><p>Beskriv vad som ska göras och var, så återkommer vi. Uppge gärna företag och telefonnummer.</p><ul class="checklist" style="margin-top:8px"><li class="chk"><a href="tel:{CO['tel']}">{CO['phone']}</a></li><li class="chk"><a href="mailto:{CO['email']}">{CO['email']}</a></li><li class="chk">{CO['street']}, {CO['zip']} {CO['city']}</li></ul></div>
-<form class="form" id="kontaktform" data-to="{CO['email']}" novalidate><div class="two"><label for="f-namn">Namn<input id="f-namn" name="namn" autocomplete="name" required></label><label for="f-foretag"><span>Företag <span class="opt">(valfritt)</span></span><input id="f-foretag" name="foretag" autocomplete="organization"></label></div><div class="two"><label for="f-epost">E-post<input id="f-epost" name="epost" type="email" autocomplete="email"></label><label for="f-tel">Telefon<input id="f-tel" name="telefon" type="tel" autocomplete="tel"></label></div><label for="f-arende">Ärende<select id="f-arende" name="arende">{options}</select></label><label for="f-medd">Meddelande<textarea id="f-medd" name="meddelande" required></textarea></label><button class="btn btn-red" type="submit">Skicka</button><p class="note">Ditt e-postprogram öppnas med meddelandet ifyllt till {CO['email']}.</p><p class="msg" role="status" aria-live="polite"></p></form></div></section>
+    body = hero(p, VAN, "Kontakta oss",
+                "Ring växeln, mejla eller vänd er direkt till någon av våra projektledare. Ni kan också skicka en förfrågan via formuläret.",
+                eyebrow=escape(CO["name"]), year=False, img_style="object-position:0 50%")
+    body += f"""<section class="sec" id="formular"><div class="wrap split top">
+<div class="prose"><span class="eyebrow">Växel och e-post</span><h2 class="h2">Så når ni oss</h2>
+<p>Beskriv gärna kort vad som ska göras och var, så återkommer vi.</p>
+{contact_list()}</div>
+<form class="form" id="kontaktform" data-to="{CO['email']}" novalidate>
+<h3>Skicka en förfrågan</h3>
+<div class="two"><label for="f-namn">Namn<input id="f-namn" name="namn" autocomplete="name" required></label>
+<label for="f-foretag"><span>Företag <span class="opt">(valfritt)</span></span><input id="f-foretag" name="foretag" autocomplete="organization"></label></div>
+<div class="two"><label for="f-epost">E-post<input id="f-epost" name="epost" type="email" autocomplete="email"></label>
+<label for="f-tel">Telefon<input id="f-tel" name="telefon" type="tel" autocomplete="tel"></label></div>
+<label for="f-arende">Ärende<select id="f-arende" name="arende">{options}</select></label>
+<label for="f-medd">Meddelande<textarea id="f-medd" name="meddelande" required></textarea></label>
+<button class="btn btn-navy" type="submit">Skicka förfrågan</button>
+<p class="note">När du skickar öppnas ditt e-postprogram med meddelandet ifyllt till {CO['email']}. Du kan också ringa oss på {CO['phone']}.</p>
+<p class="msg" role="status" aria-live="polite"></p>
+</form></div></section>
 """
-    body += split(p, BUILDING,
-                  f'<span class="eyebrow">Kontor</span><h2 class="h2">{CO["street"]}, Göteborg</h2>'
-                  f'<p>{escape(CO["name"])}<br>{CO["street"]}<br>{CO["zip"]} {CO["city"]}</p>'
-                  f'<div class="btns"><a class="btn btn-line arrow" href="{MAPS}" target="_blank" rel="noopener">Öppna i Google Maps </a></div>',
-                  rev=True, sec_id="karta")
+    body += f"""<section class="sec gray" id="projektledare"><div class="wrap">
+<div class="sec-head"><div class="prose"><span class="eyebrow">Personal</span><h2 class="h2">Våra projektledare</h2>
+<p>Kontakta våra projektledare direkt på mobil eller e-post.</p></div></div>
+<div class="grid g2">{people}</div></div></section>
+"""
+    body += f"""<section class="sec" id="karta"><div class="wrap split">
+<div class="prose"><span class="eyebrow">Adress</span><h2 class="h2">{CO['street']}, Göteborg</h2>
+<p>{escape(CO['name'])}<br>{CO['street']}<br>{CO['zip']} {CO['city']}</p>
+<div class="btns"><a class="btn btn-line arrow" href="{MAPS}" target="_blank" rel="noopener">Öppna i Google Maps </a></div></div>
+<figure class="media">{picture(p, *BUILDING)}</figure>
+</div></section>
+"""
     return (head(p, "kontakt", "Kontakta oss | Nyberg & Karlsons Elektriska AB, Göteborg",
                  "Kontakta Nyberg & Karlsons Elektriska AB på 031-80 13 50 eller mail@nykael.se. Norra Ågatan 10, Göteborg. Kontaktuppgifter till våra projektledare.",
                  "/kontakta-oss/", schema()) + nav(p, "kontakt") + body + foot(p))
-
 
 # ------------------------------------------------------------------ 404
 def page_404():
     # 404-sidan kan visas på vilken adress som helst, därför absoluta sökvägar
     p = "/"
-    body = hero(p, BUILDING, "Sidan kunde inte hittas", "Adressen finns inte, eller så har sidan flyttats.", eyebrow="404")
+    body = hero(p, BUILDING, "Sidan kunde inte hittas", "Adressen finns inte, eller så har sidan flyttats.", eyebrow="404", year=False)
     html = head(p, "404", "Sidan kunde inte hittas | Nyberg & Karlsons Elektriska AB", "Sidan kunde inte hittas.", "/404.html",
                 '<meta name="robots" content="noindex">\n') + nav(p, "") + body + foot(p)
     return html.replace('href="/index.html', 'href="/')
