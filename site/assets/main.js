@@ -52,17 +52,4 @@
       window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Förfrågan: ' + val('arende')) + '&body=' + encodeURIComponent(body);
     });
   }
-
-  // ---------------------------------------------------------------- inglidning
-  var items = document.querySelectorAll('.reveal');
-  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    items.forEach(function (el) { el.classList.add('in'); });
-    return;
-  }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-    });
-  }, { rootMargin: '0px 0px -8% 0px' });
-  items.forEach(function (el) { io.observe(el); });
 })();

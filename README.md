@@ -1,8 +1,9 @@
 # Nya nykael.se – Nyberg & Karlsons Elektriska AB
 
-Statisk webbplats byggd i samma stil som nya Bloms El & Data (fotohero med överlappande kort, färgad navbar,
-Poppins, växlande vita/ljusgrå sektioner och färgad sidfot), men med Nyberg & Karlsons egna färger ur logotypen:
-marinblått, ljusblått och vinrött.
+Statisk webbplats byggd med samma designsystem och sidstruktur som nya Bloms El & Data (heroförslag 15:
+fotohero med överlappande bildkort, färgad navbar med enkel meny, Poppins, växlande split-sektioner, bildkort,
+citat, bildremsa, mörk sektion, bildband, förtroenderad och färgad sidfot). Färgerna kommer ur Nyberg & Karlsons
+logotyp: marinblått för navbar och sidfot, vinrött för knappar och etiketter, ljusblått som accent.
 
 All fakta kommer från nykael.se: startsidan, *Företaget*, *Kontakta oss* och WordPress-mediabiblioteket.
 
@@ -13,6 +14,7 @@ All fakta kommer från nykael.se: startsidan, *Företaget*, *Kontakta oss* och W
 - `site/img/` logotyp och bilder hämtade från nykael.se
 
 Sidorna ligger på samma adresser som tidigare, så gamla länkar fungerar: `/`, `/foretaget/`, `/kontakta-oss/`.
+Nytt är `/verksamhet/` (motsvarar Bloms Tjänster-sida).
 Dessutom `404.html`, `robots.txt` och `sitemap.xml`. Publicera innehållet i `site/` som webbplatsens rot.
 
 ## Bilder och logotyp
@@ -24,6 +26,21 @@ Dessutom `404.html`, `robots.txt` och `sitemap.xml`. Publicera innehållet i `si
 | `foretaget-lokaler-servicebilar.*` | `start.jpg` (byggnad med skylt, servicebilar och personal), uppskalad 2× |
 | `servicebil-dekal.*` | `Nok-nya-logga-bil20.jpg` (logotypen på en servicebil), uppskalad 2× |
 | `favicon.png`, `apple-touch-icon.png`, `og-bild.jpg` | gjorda av logotypen och `start.jpg` |
+
+### Illustrationsbilder (CC0, ingen attribution krävs)
+
+Nykael.se har bara två foton, så verksamhetsområdena illustreras med fria bilder. De visar **inte** företagets
+egna arbeten eller anställda och bör bytas mot egna foton när sådana finns.
+
+| Fil | Källa |
+| --- | --- |
+| `bild-elservice.*` | Michal Jarmoluk, StockSnap (CC0) https://stocksnap.io/photo/electrician-electricity-QJ55PI34SY |
+| `bild-industri-elcentral.*` | Michal Jarmoluk, StockSnap (CC0) https://stocksnap.io/photo/electrician-electricity-3A5FXM89OG |
+| `bild-fastighet-kontorshus.*` | Open Grid Scheduler, Flickr (CC0) https://www.flickr.com/photos/29155878@N03/26930332206 |
+| `bild-butik-interior.*` | Artem Beliaikin, Flickr (CC0) https://www.flickr.com/photos/157635012@N07/49390481077 |
+| `bild-nyproduktion-kabelstegar.*` | Darryl, WordPress Photos (CC0) https://wordpress.org/photos/photo/63761f0310/ |
+| `bild-ombyggnad-belysning.*` | YellowstoneNPS, Flickr (Public Domain) https://www.flickr.com/photos/80223459@N05/52653265115 |
+| `bild-elcentral-plintar.*` | rawpixel (CC0) https://www.rawpixel.com/image/5904900 |
 
 Originalbilderna är små (ca 400 px breda). Skicka gärna större foton på personal, bilar och arbeten så blir sajten skarpare.
 
