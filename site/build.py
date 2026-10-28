@@ -5,6 +5,7 @@ Gamla adresser (/, /foretaget/, /kontakta-oss/) finns kvar så att befintliga l�
 All fakta kommer från nykael.se (startsida, Företaget, Kontakta oss och mediabiblioteket).
 """
 import json
+import os
 from html import escape
 from pathlib import Path
 
@@ -352,12 +353,13 @@ def page_kontakt():
 
 # ------------------------------------------------------------------ 404
 def page_404():
-    # 404-sidan kan visas på vilken adress som helst, därför absoluta sökvägar
-    p = "/"
+    # 404-sidan kan visas på vilken adress som helst, därför absoluta sökvägar.
+    # SITE_BASE sätts när sajten ligger i en undermapp, t.ex. /N-K-Elektriska/ på GitHub Pages.
+    p = os.environ.get("SITE_BASE", "/")
     body = hero(p, BUILDING, "Sidan kunde inte hittas", "Adressen finns inte, eller så har sidan flyttats.", eyebrow="404", year=False)
     html = head(p, "404", "Sidan kunde inte hittas | Nyberg & Karlsons Elektriska AB", "Sidan kunde inte hittas.", "/404.html",
                 '<meta name="robots" content="noindex">\n') + nav(p, "") + body + foot(p)
-    return html.replace('href="/index.html', 'href="/')
+    return html.replace(f'href="{p}index.html', f'href="{p}')
 
 
 def main():

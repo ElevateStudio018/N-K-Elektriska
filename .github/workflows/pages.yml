@@ -1,0 +1,33 @@
+# Publicerar site/ på GitHub Pages: https://elevatestudio018.github.io/N-K-Elektriska/
+name: GitHub Pages
+
+on:
+  push:
+    branches: [claude/optimistic-clarke-no7qwn]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bygg 404-sidan för undermappen
+        run: SITE_BASE=/N-K-Elektriska/ python3 site/build.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

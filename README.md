@@ -17,6 +17,10 @@ Sidorna ligger på samma adresser som tidigare, så gamla länkar fungerar: `/`,
 Nytt är `/verksamhet/` med alla verksamhetsområden.
 Dessutom `404.html`, `robots.txt` och `sitemap.xml`. Publicera innehållet i `site/` som webbplatsens rot.
 
+Förhandsvisning på GitHub Pages: https://elevatestudio018.github.io/N-K-Elektriska/ – publiceras automatiskt
+av `.github/workflows/pages.yml` vid varje push. Där ligger sajten i en undermapp, därför byggs 404-sidan med
+`SITE_BASE=/N-K-Elektriska/`.
+
 ## Bilder och logotyp
 
 | Fil | Källa |
